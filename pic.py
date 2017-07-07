@@ -120,7 +120,7 @@ class Picture:
 
     def get_box4ratio_cut(self, ratio, center=None):
         """
-        give the edges of the image to have the correct ratio
+        Give the edges of the image to have the correct ratio
         Can be centered on a specific place of the image
         """
         if center is None:
@@ -153,7 +153,7 @@ class Picture:
         else:
             self.crop_on_place(box)
         
-               
+              
 
     def crop(self, box=None):
         """
@@ -196,3 +196,41 @@ class Picture:
 
     def face_crop(self, whichface=0, nb_face=1):
         pass
+
+    def adjust_box(self, box):
+        """
+        function which try to adjust the box to fit it in the image
+        """
+
+        return self._adjust_box(box, (0,0)+self.im.size)
+
+    def _adjust_box(self, box, size):
+        """
+        function which try to adjust the box to fit it in a rectangle
+        """
+        # test if it can fit at all
+        if (    box[2]-box[0] > size[2]-size[0]
+             or box[3]-box[1] > size[3]-size[1]):
+
+             return None
+        
+        else:
+            if box[0] < size[0]:
+                delta = size[0] - box[0]
+                box = (box[0] + delta, box[1],
+                       box[2] + delta, box[3])
+            elif box[2] > size[2]:
+                delta = size[2] - box[2]
+                box = (box[0] + delta, box[1],
+                       box[2] + delta, box[3])
+
+            if box[1] < size[1]:
+                delta = size[1] - box[1]
+                box = (box[0], box[1] + delta,
+                       box[2], box[3] + delta)
+            elif box[3] > size[3]:
+                delta = size[3] - box[3]
+                box = (box[0], box[1] + delta,
+                       box[2], box[3] + delta)
+            
+            return box
