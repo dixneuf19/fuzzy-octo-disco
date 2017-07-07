@@ -33,6 +33,7 @@ class Picture:
         self.raw = []
         self.face_location = []
         self.nb_face = 0
+        self.cut_error = False
 
         if open:
             self.open()
@@ -125,7 +126,7 @@ class Picture:
         Can be centered on a specific place of the image
         """
         if center is None:
-            center = (int((box[2]-box[0])/2), int((box[3]-box[1])/2))
+            center = (int(box[0] + (box[2]-box[0])/2), int(box[1] + (box[3]-box[1])/2))
         
         x, y = box[2]-box[0], box[3]-box[1]
 
@@ -216,8 +217,32 @@ class Picture:
         self.face_location, self.nb_face = self.update_face_location(box)
 
 
-    def face_crop(self, whichface=0, nb_face=1):
-        pass
+    def face_crop(self, ratio=None, margin=0.2, whichface=0):
+        """
+        cut around a face, adding a margin and eventually adjust the box for a correct ratio
+        """
+        # select the correct face
+        box = self.face_location[whichface]
+
+        # add the margin
+        left, top, right, bottom = box
+        face_height, face_width = bottom-top, right-left
+        top , bottom = int(top - face_height*margin), int(bottom + face_height*margin)
+        left, right = int(left - face_width*margin), int(right + face_width*margin)
+        box = left, top, right, bottom
+
+        # corect for the ratio
+        if not(ratio is None):
+            box = self.get_box4ratio_add(box, ratio)
+
+        # check if it fits 
+        box = self.adjust_box(box)
+        if box is None:
+            print("It can't fit ! Try to pick a smaller margin")
+            self.cut_error = True
+
+        # finally do the crop
+        self.crop_on_place(box)
 
     def adjust_box(self, box):
         """
@@ -235,7 +260,7 @@ class Picture:
         if (    box[2]-box[0] > size[2]-size[0]
              or box[3]-box[1] > size[3]-size[1]):
 
-             return None
+            return None
         
         else:
             if box[0] < size[0]:
