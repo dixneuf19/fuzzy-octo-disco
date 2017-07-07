@@ -62,7 +62,7 @@ class Picture:
         im_arr = np.fromstring(self.im.tobytes(), dtype=np.uint8)
         im_arr = im_arr.reshape((self.im.size[1],
                                  self.im.size[0], 
-                                 self.im.im.bands))
+                                 self.im.im.bands)) #doesn't always works...
         self.raw = im_arr
 
 
@@ -118,25 +118,42 @@ class Picture:
         # we lose the location of faces
         self.face_location = []
 
-    def ratio_cut(self, ratio, center=None):
+    def get_box4ratio_cut(self, ratio, center=None):
         """
-        Cut the edges of the image to have the correct ratio
+        give the edges of the image to have the correct ratio
         Can be centered on a specific place of the image
         """
         if center is None:
             center = (int(self.im.width/2), int(self.im.height/2))
+        
         x, y = self.im.size
+
         if int(x*ratio[1] - y*ratio[0]) == 0:
-            pass
+            return None
         elif int(x*ratio[1] - y*ratio[0]) > 0:
             new_width = y*(ratio[0]/ratio[1])
-            self.crop_on_place((int(center[0] - new_width/2), 0,
-                                int(center[0] + new_width/2), self.im.height))
+            return (int(center[0] - new_width/2), 0,
+                    int(center[0] + new_width/2), self.im.height)
         else:
             new_height = x*(ratio[1]/ratio[0])
-            self.crop_on_place((             0, int(center[1] - new_height/2),
-                                self.im.height, int(center[1] + new_height/2)))
-            
+            return (             0, int(center[1] - new_height/2),
+                    self.im.height, int(center[1] + new_height/2))
+
+
+    def ratio_cut(self, ratio, center=None):
+        """
+        Cut the edges of the images to have the correct ratio
+        Can be centered on a specific place of the image
+        """
+
+        box = self.get_box4ratio_cut(ratio, center)
+
+        if box is None:
+            pass
+        else:
+            self.crop_on_place(box)
+        
+               
 
     def crop(self, box=None):
         """
