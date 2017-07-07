@@ -83,6 +83,7 @@ class Picture:
         face_location = face_recognition.face_locations(pic)
         # current format : (top, right, bottom, left)
         # switching to (left, top, right, bottom) used by PIL
+        self.face_location = []
         for face in face_location:
             self.face_location.append((face[3], face[0],
                                        face[1], face[2]))
@@ -118,9 +119,30 @@ class Picture:
         # we lose the location of faces
         self.face_location = []
 
+    def get_box4ratio_add(self, box, ratio, center=None):
+        """
+        Give the edges of the image to have the correct ratio by adding material
+        Can be centered on a specific place of the image
+        """
+        if center is None:
+            center = (int((box[2]-box[0])/2), int((box[3]-box[1])/2))
+        
+        x, y = box[2]-box[0], box[3]-box[1]
+
+        if int(x*ratio[1] - y*ratio[0]) == 0:
+            return box
+        elif int(x*ratio[1] - y*ratio[0]) > 0:
+            new_height = x*(ratio[1]/ratio[0])
+            return (box[0], int(center[1] - new_height/2), 
+                    box[2], int(center[1] + new_height/2))
+        else:
+            new_width = y*(ratio[0]/ratio[1])
+            return (int(center[0] - new_width/2), box[1],
+                    int(center[0] + new_width/2), box[3])
+
     def get_box4ratio_cut(self, ratio, center=None):
         """
-        Give the edges of the image to have the correct ratio
+        Give the edges of the image to have the correct ratio by cutting material
         Can be centered on a specific place of the image
         """
         if center is None:
@@ -199,10 +221,11 @@ class Picture:
 
     def adjust_box(self, box):
         """
-        function which try to adjust the box to fit it in the image
+        method which try to adjust the box to fit it in the image
         """
 
         return self._adjust_box(box, (0,0)+self.im.size)
+
 
     def _adjust_box(self, box, size):
         """
