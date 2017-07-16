@@ -19,6 +19,8 @@ parser.add_argument(
     type=float,
     help="Specify the margin around the face if the face_crop is activate")
 parser.add_argument("--json", "-j", help="Path to a config file")
+parser.add_argument(
+    "--rotate", default=True, help="Try to rotate the picture to find faces")
 
 
 def load_json_config(path):
@@ -29,7 +31,11 @@ def load_json_config(path):
     return json.loads(Path(path).text())
 
 
-def process_pic(file_path, nb_faces=1, face_crop=False, margin=0.4):
+def process_pic(file_path,
+                resolution=None,
+                nb_faces=1,
+                margin=0.4,
+                rotate=True):
 
     # check if the format is supported
     if not (file_path.ext in (".jpg", ".jpeg", ".png", ".gif")):
@@ -38,13 +44,42 @@ def process_pic(file_path, nb_faces=1, face_crop=False, margin=0.4):
 
     # create the Picture instance
     im = Picture(file_path)
+    # try to open it
     try:
         im.open()
     except OSError:
         return
 
-    im.show()
+    # find faces, exit if it doesn't respect the nb_faces argument
+    if nb_faces >= 1:
+        im.find_face()
 
+        # if no faces found at all
+        if im.nb_face == 0:
+            print("No faces found in", file_path)
+
+            # let's try to rotate the picture
+            if rotate:
+                print("Try to rotate the picture")
+                i = 0
+                while i < 3 and im.nb_face == 0:
+                    im.rotate(im.ROTATE_90)
+                    im.find_face()
+                    i += 1
+
+                # No faces found
+                if im.nb_face == 0:
+                    print("Tried all rotations, but no faces found in",
+                          file_path)
+                    return
+
+        # Expecting only one_face, found more
+        if nb_faces == 1 != im.nb_face:
+            print("Found", im.nb_face, "faces, expecting only one face.")
+            return
+
+        # if everything went alright
+        print("Found", im.nb_face, "face(s).")
 
     im.show()
 
@@ -64,4 +99,5 @@ if __name__ == '__main__':
     # Assume that the destination is a file
 
     file_path = path
-    process_pic(file_path)
+    process_pic(file_path, c["resolution"], c["nb_faces"], c["margin"],
+                c["rotate"])

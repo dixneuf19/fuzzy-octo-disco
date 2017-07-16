@@ -101,6 +101,7 @@ class Picture:
         :returns: Returns a flipped or rotated copy of this image.
         """
         self.im = self.im.transpose(method)
+        self.raw = []
 
     def resize(self, size, conserv_ratio=0, resample=1):
         """
