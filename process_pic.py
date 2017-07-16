@@ -46,13 +46,7 @@ def process_pic(file_path, nb_faces=1, face_crop=False, margin=0.4):
     im.show()
 
 
-def merge(dict_1, dict_2):
-    """Merge two dictionaries.
-    Values that evaluate to true take priority over falsy values.
-    `dict_1` takes priority over `dict_2`.
-    """
-    return dict((str(key), dict_1.get(key) or dict_2.get(key))
-                for key in set(dict_2) | set(dict_1))
+    im.show()
 
 
 if __name__ == '__main__':
@@ -62,7 +56,8 @@ if __name__ == '__main__':
     else:
         config = {}
     # Shell options takes priority over json config
-    c = merge(vars(args), config)
+    config.update(vars(args))
+    c = config  # refactoring
     path = Path(c["path"])
     # Assume that the destination is a file
 
