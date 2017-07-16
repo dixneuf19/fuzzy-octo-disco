@@ -25,13 +25,24 @@ def load_json_config(path):
     Import a config file written in json
     """
     import json
-    # Pretend that we load the following JSON file:
     return json.loads(Path(path).text())
 
 
-def process_pic(path, nb_faces=1, face_crop=False, margin=0.4):
-    file_path = Path(path)
-    pass
+def process_pic(file_path, nb_faces=1, face_crop=False, margin=0.4):
+
+    # check if the format is supported
+    if not (file_path.ext in (".jpg", ".jpeg", ".png", ".gif")):
+        print("The type of", filepath, "isn't supported.")
+        return
+
+    # create the Picture instance
+    im = Picture(file_path)
+    try:
+        im.open()
+    except OSError:
+        return
+
+    im.show()
 
 
 def merge(dict_1, dict_2):
@@ -50,4 +61,9 @@ if __name__ == '__main__':
     else:
         config = {}
     # Shell options takes priority over json config
-    config = merge(vars(args), config)
+    c = merge(vars(args), config)
+    path = Path(c["path"])
+    # Assume that the destination is a file
+
+    file_path = path
+    process_pic(file_path)

@@ -37,7 +37,11 @@ class Picture:
             self.open()
 
     def open(self):
-        self.im = Image.open(self.file_path)
+        try:
+            self.im = Image.open(self.file_path)
+        except OSError:
+            print("The type of", self.file_path, "isn't supported")
+            raise
 
     def save(self, outfile_path="", format=None):
         if outfile_path == "":
