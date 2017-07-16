@@ -53,6 +53,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if args.json:
         config = load_json_config(args.json)
+        x, y = config["resolution"].split("x")
+        config["resolution"] = (int(x), int(y))
     else:
         config = {}
     # Shell options takes priority over json config
