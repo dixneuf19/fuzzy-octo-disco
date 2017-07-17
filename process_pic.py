@@ -29,7 +29,35 @@ def load_json_config(path):
     """
     import json
     return json.loads(Path(path).text())
+def find_faces(im, nb_faces, rotate):
+    im.find_face()
 
+    # if no faces found at all
+    if im.nb_face == 0:
+        print("No faces found in", file_path)
+
+        # let's try to rotate the picture
+        if rotate:
+            print("Try to rotate the picture")
+            i = 0
+            while i < 3 and im.nb_face == 0:
+                im.rotate(im.ROTATE_90)
+                im.find_face()
+                i += 1
+
+            # No faces found
+            if im.nb_face == 0:
+                print("Tried all rotations, but no faces found in", file_path)
+                return 0
+
+        # Expecting only one_face, found more
+    if nb_faces == 1 != im.nb_face:
+        print("Found", im.nb_face, "faces, expecting only one face.")
+        return 0
+
+    return im.nb_face
+
+def face_crop
 
 def process_pic(file_path,
                 resolution=None,
@@ -52,30 +80,9 @@ def process_pic(file_path,
 
     # find faces, exit if it doesn't respect the nb_faces argument
     if nb_faces >= 1:
-        im.find_face()
+        nb_faces_found = find_faces(im, nb_faces, rotate)
 
-        # if no faces found at all
-        if im.nb_face == 0:
-            print("No faces found in", file_path)
-
-            # let's try to rotate the picture
-            if rotate:
-                print("Try to rotate the picture")
-                i = 0
-                while i < 3 and im.nb_face == 0:
-                    im.rotate(im.ROTATE_90)
-                    im.find_face()
-                    i += 1
-
-                # No faces found
-                if im.nb_face == 0:
-                    print("Tried all rotations, but no faces found in",
-                          file_path)
-                    return
-
-        # Expecting only one_face, found more
-        if nb_faces == 1 != im.nb_face:
-            print("Found", im.nb_face, "faces, expecting only one face.")
+        if nb_faces_found == 0:
             return
 
         # if everything went alright

@@ -211,7 +211,7 @@ class Picture:
         self.im = self.crop(box)
         self.face_location, self.nb_face = self.update_face_location(box)
 
-    def face_crop(self, ratio=None, margin=0.2, whichface=0):
+    def face_crop(self, ratio=None, margin=0.4, whichface=0):
         """
         cut around a face, adding a margin and eventually adjust the box for a correct ratio
         """
