@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 from pic import Picture
 from path import Path
-import argparse
+import argparse, copy
 parser = argparse.ArgumentParser(
     description=
     "Process the picture or the directory, given the json config file")
@@ -47,12 +47,14 @@ def load_json_config(path):
     """
     import json
     return json.loads(Path(path).text())
+
+
 def find_faces(im, nb_faces, rotate):
     im.find_face()
 
     # if no faces found at all
     if im.nb_face == 0:
-        print("No faces found in", file_path)
+        print("No faces found")
 
         # let's try to rotate the picture
         if rotate:
@@ -65,7 +67,7 @@ def find_faces(im, nb_faces, rotate):
 
             # No faces found
             if im.nb_face == 0:
-                print("Tried all rotations, but no faces found in", file_path)
+                print("Tried all rotations, but no faces found.")
                 return 0
 
         # Expecting only one_face, found more
@@ -75,62 +77,41 @@ def find_faces(im, nb_faces, rotate):
 
     return im.nb_face
 
-def face_crop
+
+def save(im, out_path, out_tag, max_size, file_path, extension):
+    out_path, out_tag = Path(out_path), Path(out_tag)
+    out_path = out_path + out_tag + "_" + file_path.namebase + extension
+    quality = 90
+    im.save(out_path, quality=quality)
+    while out_path.size > int(max_size) and quality >= 40:
+        quality -= 5
+        print("The file is too heavy, trying to save with quality :", quality)
+        im.save(out_path, quality=quality)
+
+    if out_path.size > int(max_size):
+        print("Can't manage to reduce the size under", max_size, "bytes.")
+        out_path.remove()
+    else:
+        print("The file is succesfully saved at", out_path.abspath())
+
 
 def process_pic(file_path,
-                resolution=None,
+                resolution,
+                out_tag,
+                out_path="",
+                face_crop=False,
                 nb_faces=1,
                 margin=0.4,
-                rotate=True):
+                rotate=True,
+                max_size=10000,
+                extension=".jpg",
+                skip_compression=False):
 
     # check if the format is supported
     if not (file_path.ext in (".jpg", ".jpeg", ".png", ".gif")):
-        print("The type of", filepath, "isn't supported.")
+        print("The type of", file_path, "isn't supported.")
         return
-
-    # create the Picture instance
-    im = Picture(file_path)
-    # try to open it
-    try:
-        im.open()
-    except OSError:
-        return
-
-    # find faces, exit if it doesn't respect the nb_faces argument
-    if nb_faces >= 1:
-        nb_faces_found = find_faces(im, nb_faces, rotate)
-
-        if nb_faces_found == 0:
-            return
-
-        # if everything went alright
-        print("Found", im.nb_face, "face(s).")
-
-    im.show()
-
-
-if __name__ == '__main__':
-    args = parser.parse_args()
-    if args.json:
-        config = load_json_config(args.json)
-        x, y = config["resolution"].split("x")
-        config["resolution"] = (int(x), int(y))
-    else:
-        config = {}
-    # Shell options takes priority over json config
-    args = vars(args)
-    for key, value in args.items():
-        if not value is None:
-            config[key] = value
-
-    c = config  # shorter name
-    path = Path(c["path"])
-    if path.isfile():
-    # Assume that the destination is a file
-        process_pic(path, c["resolution"], c["out_tag"], c["out_path"],
-                    c["face_crop"], c["nb_faces"], c["margin"], c["rotate"],
-                    c["max_size"], c["extension"])
-    elif path.isdir():
+    print("------------------------------------------------------------------")
     print("Working on ", file_path)
     # create the Picture instance
     im = Picture(file_path)
