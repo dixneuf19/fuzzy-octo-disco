@@ -100,8 +100,12 @@ if __name__ == '__main__':
     else:
         config = {}
     # Shell options takes priority over json config
-    config.update(vars(args))
-    c = config  # refactoring
+    args = vars(args)
+    for key, value in args.items():
+        if not value is None:
+            config[key] = value
+
+    c = config  # shorter name
     path = Path(c["path"])
     # Assume that the destination is a file
 
