@@ -43,10 +43,10 @@ class Picture:
             print("The type of", self.file_path, "isn't supported")
             raise
 
-    def save(self, outfile_path="", format=None):
+    def save(self, outfile_path="", quality=90):
         if outfile_path == "":
             outfile_path = self.file_path
-        self.im.save(outfile_path, format)
+        self.im.save(outfile_path, quality=quality)
 
     def show(self):
         if self.im == None:
@@ -221,7 +221,6 @@ class Picture:
         """
         # select the correct face
         box = self.face_location[whichface]
-
         # add the margin
         left, top, right, bottom = box
         face_height, face_width = bottom - top, right - left
@@ -238,7 +237,6 @@ class Picture:
         # check if it fits
         box = self.adjust_box(box)
         if box is None:
-            print("It can't fit ! Try to pick a smaller margin")
             self.cut_error = True
 
         # finally do the crop
