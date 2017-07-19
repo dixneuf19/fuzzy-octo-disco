@@ -107,8 +107,97 @@ if __name__ == '__main__':
 
     c = config  # shorter name
     path = Path(c["path"])
+    if path.isfile():
     # Assume that the destination is a file
+        process_pic(path, c["resolution"], c["out_tag"], c["out_path"],
+                    c["face_crop"], c["nb_faces"], c["margin"], c["rotate"],
+                    c["max_size"], c["extension"])
+    elif path.isdir():
+    print("Working on ", file_path)
+    # create the Picture instance
+    im = Picture(file_path)
+    # try to open it
+    try:
+        im.open()
+    except OSError:
+        return
 
-    file_path = path
-    process_pic(file_path, c["resolution"], c["nb_faces"], c["margin"],
-                c["rotate"])
+    # find faces, exit if it doesn't respect the nb_faces argument
+    if nb_faces >= 1:
+        nb_faces_found = find_faces(im, nb_faces, rotate)
+
+        if nb_faces_found == 0:
+            return
+        # if everything went alright
+        print("Found", im.nb_face, "face(s).")
+
+    # crop around the face
+
+    if im.nb_face > 0 and face_crop:
+
+        for i in range(im.nb_face):
+            print("Working on face", str(i + 1))
+            face = copy.deepcopy(im)
+            end_flag = False
+            while not end_flag:
+                face.face_crop(resolution, margin, whichface=i)
+                if face.cut_error:
+                    margin -= 0.05
+                    if margin < 0:
+                        return
+
+                    print(
+                        "The crop can't fit, now trying with a smaller margin of",
+                        margin)
+                    face.cut_error = 0
+                else:
+                    end_flag = True
+            if skip_compression:
+                face.save(out_path + out_tag + str(i) + "_" +
+                          file_path.namebase + extension)
+                return "Succes"
+            face.resize(resolution)
+            save(face, out_path, out_tag + str(i), max_size, file_path,
+                 extension)
+    else:
+        if skip_compression:
+            im.save(out_path + out_tag + str(i) + "_" + file_path.namebase +
+                    extension)
+            return "Succes"
+        im.ratio_cut(resolution)
+        im.resize(resolution)
+        save(im, out_path, out_tag, max_size, file_path, extension)
+
+
+if __name__ == '__main__':
+    args = parser.parse_args()
+    if args.json:
+        config = load_json_config(args.json)
+        x, y = config["resolution"].split("x")
+        config["resolution"] = (int(x), int(y))
+    else:
+        config = {}
+    # Shell options takes priority over json config
+    args = vars(args)
+    for key, value in args.items():
+        if not value is None:
+            config[key] = value
+
+    c = config  # shorter name
+    path = Path(c["path"])
+    if path.isfile():
+        # Assume that the destination is a file
+        process_pic(path, c["resolution"], c["out_tag"], c["out_path"],
+                    c["face_crop"], c["nb_faces"], c["margin"], c["rotate"],
+                    c["max_size"], c["extension"])
+    elif path.isdir():
+
+        for file in path.files():
+            if file.isfile():
+                if file.ext in (".jpg", ".jepg", ".png", ".gif"):
+                    process_pic(file, c["resolution"], c["out_tag"],
+                                c["out_path"], c["face_crop"], c["nb_faces"],
+                                c["margin"], c["rotate"], c["max_size"],
+                                c["extension"], c["skip_compression"])
+    else:
+        print("This path doesn't exist")
