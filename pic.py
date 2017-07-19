@@ -184,6 +184,10 @@ class Picture:
         return self.im.crop(box)
 
     def update_face_location(self, box):
+
+        if box is None:
+            return (self.face_location, self.nb_face)
+
         face_locations = []
         nb_face = 0
         for i in range(self.nb_face):
