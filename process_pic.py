@@ -21,6 +21,24 @@ parser.add_argument(
 parser.add_argument("--json", "-j", help="Path to a config file")
 parser.add_argument(
     "--rotate", default=True, help="Try to rotate the picture to find faces")
+parser.add_argument(
+    "--skip_compression", action='store_true', help="skip compression")
+parser.add_argument(
+    "--resolution",
+    "-r",
+    help=
+    "ratio and resolution for the resize of the picture, for example 240x300")
+parser.add_argument(
+    "--face_crop",
+    action="store_true",
+    help="crop around the faces found on picture")
+parser.add_argument("--out_path", help="path for the output file(s)")
+parser.add_argument("--out_tag", help="tag for the output file(s)")
+parser.add_argument(
+    "--max_size", help="max size in bytes for the output file(s)")
+parser.add_argument(
+    "--ext",
+    help="choose the extension of the output file(s) : .jpg, .gif, .png")
 
 
 def load_json_config(path):
