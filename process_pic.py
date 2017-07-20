@@ -30,8 +30,8 @@ parser.add_argument(
     "ratio and resolution for the resize of the picture, for example 240x300")
 parser.add_argument(
     "--face_crop",
-    action="store_true",
-    help="crop around the faces found on picture")
+    action="store_false",
+    help="crop around the faces found on picture, activated by default")
 parser.add_argument("--out_path", help="path for the output file(s)")
 parser.add_argument("--out_tag", help="tag for the output file(s)")
 parser.add_argument(
@@ -108,7 +108,7 @@ def process_pic(file_path,
                 skip_compression=False):
 
     # check if the format is supported
-    if not (file_path.ext in (".jpg", ".jpeg", ".png", ".gif")):
+    if not (file_path.ext.lower() in (".jpg", ".jpeg", ".png", ".gif")):
         print("The type of", file_path, "isn't supported.")
         return
     print("------------------------------------------------------------------")
