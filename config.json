@@ -1,0 +1,11 @@
+{
+    "nb_faces": 1,
+    "margin": 0.4,
+    "resolution": "240x300",
+    "rotate": true,
+    "face_crop": true,
+    "out_path": "/home/forthel/grosdossiertest/",
+    "out_tag": "",
+    "max_size": "10000",
+    "extension": ".jpg"
+}
