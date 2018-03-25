@@ -1,41 +1,52 @@
 #-*- coding: utf-8 -*-
 from pic import Picture
 from path import Path
-import argparse, copy
+import argparse
+import copy
+
 parser = argparse.ArgumentParser(
-    description=
-    "Process the picture or the directory, given the json config file")
+    description="Process the picture or the directory, given the json config file")
+
+
 parser.add_argument("path", help="Path for the picture or the directory")
 parser.add_argument(
     "-n",
     "--nb_faces",
     type=int,
-    help=
-    "0 | 1 | n to don't search for any face | search and expect exactly one face | search for multiple face"
+    help="0 | 1 | n to don't search for any face | search and expect exactly one face | search for multiple face"
 )
+
 parser.add_argument(
     "--margin",
     "-m",
     type=float,
     help="Specify the margin around the face if the face_crop is activate")
+
 parser.add_argument("--json", "-j", help="Path to a config file")
+
 parser.add_argument(
     "--rotate", default=True, help="Try to rotate the picture to find faces")
+
 parser.add_argument(
     "--skip_compression", action='store_true', help="skip compression")
+
 parser.add_argument(
     "--resolution",
     "-r",
-    help=
-    "ratio and resolution for the resize of the picture, for example 240x300")
+    help="ratio and resolution for the resize of the picture, for example 240x300")
+
 parser.add_argument(
     "--face_crop",
     action="store_false",
     help="crop around the faces found on picture, activated by default")
+
 parser.add_argument("--out_path", help="path for the output file(s)")
+
 parser.add_argument("--out_tag", help="tag for the output file(s)")
+
 parser.add_argument(
     "--max_size", help="max size in bytes for the output file(s)")
+
 parser.add_argument(
     "--ext",
     help="choose the extension of the output file(s) : .jpg, .gif, .png")
@@ -169,20 +180,23 @@ def process_pic(file_path,
 
 
 if __name__ == '__main__':
+
     args = parser.parse_args()
+
     if args.json:
         config = load_json_config(args.json)
         x, y = config["resolution"].split("x")
         config["resolution"] = (int(x), int(y))
     else:
         config = {}
+        
     # Shell options takes priority over json config
     args = vars(args)
     for key, value in args.items():
         if not value is None:
             config[key] = value
 
-    c = config  # shorter name
+    c = config  #  shorter name
     path = Path(c["path"])
     if path.isfile():
         # Assume that the destination is a file
