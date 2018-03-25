@@ -200,8 +200,7 @@ class Picture:
                  face[3] > box[3] or
                  face[0] < box[0] or
                  face[1] < box[1])):
-
-                print("Face", i, "is cut")
+                pass
             else:
                 new_face = (face[0] - box[0], face[1] - box[1],
                             face[2] - box[0], face[3] - box[1])
