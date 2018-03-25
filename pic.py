@@ -1,5 +1,6 @@
 #!/usr/bin/python3
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
+
 from PIL import Image
 import face_recognition
 import numpy as np
@@ -49,28 +50,27 @@ class Picture:
         self.im.save(outfile_path, quality=quality)
 
     def show(self):
-        if self.im == None:
+        if self.im is None:
             self.open()
 
         self.im.show()
 
     def image2raw(self):
         """
-        Loads image into 3D Numpy array of shape 
+        Loads image into 3D Numpy array of shape
         (width, height, bands)
         """
-        if self.im == None:
+        if self.im is None:
             self.open()
 
         im_arr = np.fromstring(self.im.tobytes(), dtype=np.uint8)
         im_arr = im_arr.reshape((self.im.size[1], self.im.size[0],
-                                 self.im.im.bands))  #doesn't always works...
+                                 self.im.im.bands))  # doesn't always works...
         self.raw = im_arr
 
     def find_face(self, fromraw=True):
         """
         Update the list of the locations of the faces found on the Picture
-        
         """
         if fromraw:
 
@@ -83,7 +83,7 @@ class Picture:
 
         face_location = face_recognition.face_locations(pic)
         # current format : (top, right, bottom, left)
-        # switching to (left, top, right, bottom) used by PIL
+        # switching to (left, top, right, bottom) used by PIL
         self.face_location = []
         for face in face_location:
             self.face_location.append((face[3], face[0], face[1], face[2]))
@@ -121,7 +121,8 @@ class Picture:
 
     def get_box4ratio_add(self, box, ratio, center=None):
         """
-        Give the edges of the image to have the correct ratio by adding material
+        Give the edges of the image to have the correct ratio by adding
+        material
         Can be centered on a specific place of the image
         """
         if center is None:
@@ -143,7 +144,8 @@ class Picture:
 
     def get_box4ratio_cut(self, ratio, center=None):
         """
-        Give the edges of the image to have the correct ratio by cutting material
+        Give the edges of the image to have the correct ratio by cutting
+        material
         Can be centered on a specific place of the image
         """
         if center is None:
@@ -194,8 +196,10 @@ class Picture:
             face = self.face_location[i]
 
             # check if this face is still on the picture
-            if (face[2] > box[2] or face[3] > box[3] or face[0] < box[0]
-                    or face[1] < box[1]):
+            if ((face[2] > box[2] or
+                 face[3] > box[3] or
+                 face[0] < box[0] or
+                 face[1] < box[1])):
 
                 print("Face", i, "is cut")
             else:
@@ -217,10 +221,13 @@ class Picture:
 
     def face_crop(self, ratio=None, margin=0.4, whichface=0):
         """
-        cut around a face, adding a margin and eventually adjust the box for a correct ratio
+        cut around a face, adding a margin and eventually adjust the box for a
+        correct ratio
         """
-        # select the correct face
+
+        # select the correct face
         box = self.face_location[whichface]
+
         # add the margin
         left, top, right, bottom = box
         face_height, face_width = bottom - top, right - left
@@ -254,8 +261,8 @@ class Picture:
         function which try to adjust the box to fit it in a rectangle
         """
         # test if it can fit at all
-        if (box[2] - box[0] > size[2] - size[0]
-                or box[3] - box[1] > size[3] - size[1]):
+        if ((box[2] - box[0] > size[2] - size[0] or
+             box[3] - box[1] > size[3] - size[1])):
 
             return None
 
