@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-from pic import Picture
+from find_faces.pic import Picture
 from path import Path
 import argparse
 import copy
