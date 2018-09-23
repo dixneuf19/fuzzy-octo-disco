@@ -1,11 +1,11 @@
 {
     "nb_faces": 2,
     "margin": 0.4,
-    "resolution": "300x300",
     "rotate": true,
     "face_crop": true,
     "out_path": "./results/",
     "out_tag": "",
-    "max_size": "100000000",
-    "extension": ".jpg"
+    "max_size": "100000000000",
+    "extension": ".jpg",
+    "resolution": "240x300"
 }
