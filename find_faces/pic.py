@@ -5,9 +5,113 @@ from PIL import Image
 import face_recognition
 import numpy as np
 
+def image2raw(img):
+    """
+    Loads image into 3D Numpy array of shape
+    (width, height, bands)
+    """
+    
+    im_arr = np.frombuffer(img.tobytes(), dtype=np.uint8)
+    im_arr = im_arr.reshape((img.size[1], img.size[0],
+                                img.im.bands))  # doesn't always works... (img formatting)
+    return im_arr
+
+def find_faces(raw_im):
+    """
+    Get the list of the locations of the faces found on the Picture
+    """
+    face_location_temp = face_recognition.face_locations(raw_im)
+    # current format : (top, right, bottom, left)
+    # switching to (left, top, right, bottom) used by PIL
+    face_location = []
+    for face in face_location_temp:
+        face_location.append((face[3], face[0], face[1], face[2]))
+
+    return face_location
+
+def get_box4ratio_add(box, ratio, center=None):
+    """
+    Give the edges of the image to have the correct ratio by adding
+    material
+    Can be centered on a specific place of the image
+    """
+    if center is None:
+        center = (int(box[0] + (box[2] - box[0]) / 2),
+                    int(box[1] + (box[3] - box[1]) / 2))
+
+    x, y = box[2] - box[0], box[3] - box[1]
+
+    if int(x * ratio[1] - y * ratio[0]) == 0:
+        return box
+    elif int(x * ratio[1] - y * ratio[0]) > 0:
+        new_height = x * (ratio[1] / ratio[0])
+        return (box[0], int(center[1] - new_height / 2), box[2],
+                int(center[1] + new_height / 2))
+    else:
+        new_width = y * (ratio[0] / ratio[1])
+        return (int(center[0] - new_width / 2), box[1],
+                int(center[0] + new_width / 2), box[3])
+
+def get_box4ratio_cut(width, height, ratio, center=None):
+    """
+    Give the edges of the image to have the correct ratio by cutting
+    material
+    Can be centered on a specific place of the image
+    """
+    if center is None:
+        center = (int(width / 2), int(height / 2))
+
+    x, y = width, height
+
+    if int(x * ratio[1] - y * ratio[0]) == 0:
+        return None
+    elif int(x * ratio[1] - y * ratio[0]) > 0:
+        new_width = y * (ratio[0] / ratio[1])
+        return (int(center[0] - new_width / 2), 0,
+                int(center[0] + new_width / 2), height)
+    else:
+        new_height = x * (ratio[1] / ratio[0])
+        return (0, int(center[1] - new_height / 2), height,
+                int(center[1] + new_height / 2))
+
+def adjust_box(box, size):
+    """
+    function which try to adjust the box to fit it in a rectangle
+    """
+    # test if it can fit at all
+    if ((box[2] - box[0] > size[2] - size[0] or
+            box[3] - box[1] > size[3] - size[1])):
+
+        return None
+
+    else:
+        if box[0] < size[0]:
+            delta = size[0] - box[0]
+            box = (box[0] + delta, box[1], box[2] + delta, box[3])
+        elif box[2] > size[2]:
+            delta = size[2] - box[2]
+            box = (box[0] + delta, box[1], box[2] + delta, box[3])
+
+        if box[1] < size[1]:
+            delta = size[1] - box[1]
+            box = (box[0], box[1] + delta, box[2], box[3] + delta)
+        elif box[3] > size[3]:
+            delta = size[3] - box[3]
+            box = (box[0], box[1] + delta, box[2], box[3] + delta)
+
+        return box
+
+def crop(img, box=None):
+    """
+    Cut a rectangular region from this image. The box is a
+    4-tuple defining the left, upper, right, and lower pixel
+    coordinate.
+    """
+    return img.crop(box)
 
 class Picture:
     """
+    Class which can treat pictures with face_recognition and Pillow functions
     """
 
     # transpose
@@ -27,6 +131,16 @@ class Picture:
     LANCZOS = ANTIALIAS = 1
 
     def __init__(self, file_path, open=False):
+        """
+        init the Picture class, with a file_path
+        :param file_path: path of the image file
+        :param open: if you need to open the file while initializing the class
+        :prop im: object representation of the image
+        :prop raw: image as a 3D array
+        :prop face_location: list of face location (quadruplets)
+        :prop nb_face: nb of faces found ? (=len(face_location))
+        :prop cut_error: error when cutting the pic
+        """
         self.file_path = file_path
         self.im = None
         self.raw = []
@@ -38,57 +152,53 @@ class Picture:
             self.open()
 
     def open(self):
+        """
+        Open the file and store it in the class
+        """
         try:
             self.im = Image.open(self.file_path)
         except OSError:
-            print("The type of", self.file_path, "isn't supported")
+            print("The file", self.file_path, "can't be read as an image with Pillow")
             raise
 
     def save(self, outfile_path="", quality=90):
+        """
+        Save the image at the outfile_path location. 
+        Overwrite the picture if no path is specified.
+        Can specify the quality (90 by default)
+        """
         if outfile_path == "":
             outfile_path = self.file_path
         self.im.save(outfile_path, quality=quality)
 
     def show(self):
+        """
+        Display the image
+        """
         if self.im is None:
             self.open()
 
         self.im.show()
 
-    def image2raw(self):
+    
+    def img2raw(self):
         """
-        Loads image into 3D Numpy array of shape
-        (width, height, bands)
+        Apply img2raw in place
         """
-        if self.im is None:
-            self.open()
+        if self.im == None:
+            raise Exception("Need to open the image before transforming it to raw array")
+        
+        self.raw = image2raw(self.im)
 
-        im_arr = np.fromstring(self.im.tobytes(), dtype=np.uint8)
-        im_arr = im_arr.reshape((self.im.size[1], self.im.size[0],
-                                 self.im.im.bands))  # doesn't always works...
-        self.raw = im_arr
-
-    def find_face(self, fromraw=True):
+    def find_faces(self):
         """
-        Update the list of the locations of the faces found on the Picture
+        Apply find_faces in place
         """
-        if fromraw:
-
-            if self.raw == []:
-                self.image2raw()
-
-            pic = self.raw
-        else:
-            pic = face_recognition.load_image_file(self.file_path)
-
-        face_location = face_recognition.face_locations(pic)
-        # current format : (top, right, bottom, left)
-        # switching to (left, top, right, bottom) used by PIL
-        self.face_location = []
-        for face in face_location:
-            self.face_location.append((face[3], face[0], face[1], face[2]))
-
-        self.nb_face = len(self.face_location)
+        if len(self.raw) == 0:
+            raise Exception("Need to get raw img array for face_recognition")
+        
+        self.face_location = find_faces(self.raw)
+            
 
     def rotate(self, method):
         """
@@ -99,14 +209,15 @@ class Picture:
           :py:attr:`hubphoto.ROTATE_180`, :py:attr:`hubphoto.ROTATE_270` or
           :py:attr:`hubphoto.TRANSPOSE`.
         :returns: Returns a flipped or rotated copy of this image.
+        We lose the correspondance img <-> raw so we reaply img2raw
         """
         self.im = self.im.transpose(method)
-        self.raw = []
 
     def resize(self, size, conserv_ratio=0, resample=1):
         """
         resize the image
-        if conserv_ratio = 1, conserv the original ratio of the picture
+        if conserv_ratio = 1, force the conservation of the original ratio of the picture
+        We lose the correspondance img <-> raw
         """
         x, y = size
         if conserv_ratio:
@@ -119,58 +230,13 @@ class Picture:
         # we lose the location of faces
         self.face_location = []
 
-    def get_box4ratio_add(self, box, ratio, center=None):
-        """
-        Give the edges of the image to have the correct ratio by adding
-        material
-        Can be centered on a specific place of the image
-        """
-        if center is None:
-            center = (int(box[0] + (box[2] - box[0]) / 2),
-                      int(box[1] + (box[3] - box[1]) / 2))
-
-        x, y = box[2] - box[0], box[3] - box[1]
-
-        if int(x * ratio[1] - y * ratio[0]) == 0:
-            return box
-        elif int(x * ratio[1] - y * ratio[0]) > 0:
-            new_height = x * (ratio[1] / ratio[0])
-            return (box[0], int(center[1] - new_height / 2), box[2],
-                    int(center[1] + new_height / 2))
-        else:
-            new_width = y * (ratio[0] / ratio[1])
-            return (int(center[0] - new_width / 2), box[1],
-                    int(center[0] + new_width / 2), box[3])
-
-    def get_box4ratio_cut(self, ratio, center=None):
-        """
-        Give the edges of the image to have the correct ratio by cutting
-        material
-        Can be centered on a specific place of the image
-        """
-        if center is None:
-            center = (int(self.im.width / 2), int(self.im.height / 2))
-
-        x, y = self.im.size
-
-        if int(x * ratio[1] - y * ratio[0]) == 0:
-            return None
-        elif int(x * ratio[1] - y * ratio[0]) > 0:
-            new_width = y * (ratio[0] / ratio[1])
-            return (int(center[0] - new_width / 2), 0,
-                    int(center[0] + new_width / 2), self.im.height)
-        else:
-            new_height = x * (ratio[1] / ratio[0])
-            return (0, int(center[1] - new_height / 2), self.im.height,
-                    int(center[1] + new_height / 2))
-
-    def ratio_cut(self, ratio, center=None):
+    def ratio_cut(self, width, height, ratio, center=None):
         """
         Cut the edges of the images to have the correct ratio
         Can be centered on a specific place of the image
         """
 
-        box = self.get_box4ratio_cut(ratio, center)
+        box = get_box4ratio_cut(width, height, ratio, center)
 
         if box is None:
             pass
@@ -183,16 +249,17 @@ class Picture:
         4-tuple defining the left, upper, right, and lower pixel
         coordinate.
         """
-        return self.im.crop(box)
+        return crop(self.im, box)
 
-    def update_face_location(self, box):
-
-        if box is None:
-            return (self.face_location, self.nb_face)
+    def get_updated_face_location(self, box):
+        """
+        update face_location after a crop (simulate it)
+        discard if no more in the picture
+        """
 
         face_locations = []
         nb_face = 0
-        for i in range(self.nb_face):
+        for i in range(len(self.face_location)):
             face = self.face_location[i]
 
             # check if this face is still on the picture
@@ -207,7 +274,7 @@ class Picture:
                 face_locations.append(new_face)
                 nb_face += 1
 
-        return (face_locations, nb_face)
+        return face_locations
 
     def crop_on_place(self, box):
         """
@@ -216,15 +283,21 @@ class Picture:
         """
 
         self.im = self.crop(box)
-        self.face_location, self.nb_face = self.update_face_location(box)
+        self.face_location = self.get_updated_face_location(box)
 
-    def face_crop(self, ratio=None, margin=0.4, whichface=0):
+
+
+    def face_crop(self, ratio=None, margin=0, whichface=0):
         """
         cut around a face, adding a margin and eventually adjust the box for a
         correct ratio
         """
 
         # select the correct face
+        if len(self.face_location) == 0:
+            raise Exception("You need to found at least one face with find_faces first")
+        elif (len(self.face_location) > whichface + 1):
+            raise Exception("Only %d face found, can't crop on the %d nth" % (len(self.face_location), whichface))
         box = self.face_location[whichface]
 
         # add the margin
@@ -238,12 +311,12 @@ class Picture:
 
         # corect for the ratio
         if not (ratio is None):
-            box = self.get_box4ratio_add(box, ratio)
+            box = get_box4ratio_add(box, ratio)
 
         # check if it fits
         box = self.adjust_box(box)
         if box is None:
-            self.cut_error = True
+            raise Exception("The box for the face, once ajusted for the ratio, doesn't fit")
 
         # finally do the crop
         self.crop_on_place(box)
@@ -253,31 +326,6 @@ class Picture:
         method which try to adjust the box to fit it in the image
         """
 
-        return self._adjust_box(box, (0, 0) + self.im.size)
+        return adjust_box(box, (0, 0) + self.im.size)
 
-    def _adjust_box(self, box, size):
-        """
-        function which try to adjust the box to fit it in a rectangle
-        """
-        # test if it can fit at all
-        if ((box[2] - box[0] > size[2] - size[0] or
-             box[3] - box[1] > size[3] - size[1])):
-
-            return None
-
-        else:
-            if box[0] < size[0]:
-                delta = size[0] - box[0]
-                box = (box[0] + delta, box[1], box[2] + delta, box[3])
-            elif box[2] > size[2]:
-                delta = size[2] - box[2]
-                box = (box[0] + delta, box[1], box[2] + delta, box[3])
-
-            if box[1] < size[1]:
-                delta = size[1] - box[1]
-                box = (box[0], box[1] + delta, box[2], box[3] + delta)
-            elif box[3] > size[3]:
-                delta = size[3] - box[3]
-                box = (box[0], box[1] + delta, box[2], box[3] + delta)
-
-            return box
+    
