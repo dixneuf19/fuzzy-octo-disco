@@ -1,5 +1,4 @@
 import pytest
-import matplotlib.pyplot as plt
 from find_faces.pic import *
 
 @pytest.fixture
