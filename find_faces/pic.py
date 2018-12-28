@@ -162,15 +162,16 @@ class Picture:
         except OSError:
             raise Exception("The file %s can't be read as an image with Pillow" % Path(self.file_path).abspath())
 
-    def save(self, outfile_path="", quality=90):
+    def save(self, outfile_path="", quality=90, overwrite=False):
         """
         Save the image at the outfile_path location. 
         Overwrite the picture if no path is specified.
         Can specify the quality (90 by default)
         """
-        if outfile_path == "":
+        if overwrite == True:
             outfile_path = self.file_path
-        self.im.save(outfile_path, quality=quality)
+        
+        self.im.save(Path(outfile_path).abspath(), quality=quality)
 
     def show(self):
         """
@@ -219,6 +220,7 @@ class Picture:
         We lose the correspondance img <-> raw so we reaply img2raw
         """
         self.im = self.im.transpose(method)
+        self.img2raw()
 
     def resize(self, size, conserv_ratio=0, resample=1):
         """

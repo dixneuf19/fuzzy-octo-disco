@@ -22,4 +22,6 @@ message FindFacesRequest {
 message FindFacesResponse {
   string status = 1;
   repeated Picture faces = 2;
+  int32 nb_faces = 3;
+
 }

@@ -2,8 +2,8 @@ from logzero import logger
 import grpc
 import time
 
-import find_faces_pb2
-import find_faces_pb2_grpc
+from . import find_faces_pb2
+from . import find_faces_pb2_grpc
 
 
 with grpc.insecure_channel('localhost:50051') as channel:

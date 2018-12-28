@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='findFaces',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x10\x66ind-faces.proto\x12\tfindFaces\"&\n\x07Picture\x12\x0c\n\x04path\x18\x01 \x01(\t\x12\r\n\x05index\x18\x02 \x01(\x05\"7\n\x10\x46indFacesRequest\x12#\n\x07picture\x18\x01 \x01(\x0b\x32\x12.findFaces.Picture\"F\n\x11\x46indFacesResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\x12!\n\x05\x66\x61\x63\x65s\x18\x02 \x03(\x0b\x32\x12.findFaces.Picture2U\n\tFindFaces\x12H\n\tFindFaces\x12\x1b.findFaces.FindFacesRequest\x1a\x1c.findFaces.FindFacesResponse\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\x10\x66ind-faces.proto\x12\tfindFaces\"&\n\x07Picture\x12\x0c\n\x04path\x18\x01 \x01(\t\x12\r\n\x05index\x18\x02 \x01(\x05\"7\n\x10\x46indFacesRequest\x12#\n\x07picture\x18\x01 \x01(\x0b\x32\x12.findFaces.Picture\"X\n\x11\x46indFacesResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\x12!\n\x05\x66\x61\x63\x65s\x18\x02 \x03(\x0b\x32\x12.findFaces.Picture\x12\x10\n\x08nb_faces\x18\x03 \x01(\x05\x32U\n\tFindFaces\x12H\n\tFindFaces\x12\x1b.findFaces.FindFacesRequest\x1a\x1c.findFaces.FindFacesResponse\"\x00\x62\x06proto3')
 )
 
 
@@ -115,6 +115,13 @@ _FINDFACESRESPONSE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='nb_faces', full_name='findFaces.FindFacesResponse.nb_faces', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -128,7 +135,7 @@ _FINDFACESRESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=128,
-  serialized_end=198,
+  serialized_end=216,
 )
 
 _FINDFACESREQUEST.fields_by_name['picture'].message_type = _PICTURE
@@ -167,8 +174,8 @@ _FINDFACES = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=200,
-  serialized_end=285,
+  serialized_start=218,
+  serialized_end=303,
   methods=[
   _descriptor.MethodDescriptor(
     name='FindFaces',
