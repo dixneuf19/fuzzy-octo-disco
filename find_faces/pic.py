@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from PIL import Image
+from path import Path
+from copy import deepcopy
 import face_recognition
 import numpy as np
 
@@ -156,10 +158,9 @@ class Picture:
         Open the file and store it in the class
         """
         try:
-            self.im = Image.open(self.file_path)
+            self.im = Image.open(Path(self.file_path).abspath())
         except OSError:
-            print("The file", self.file_path, "can't be read as an image with Pillow")
-            raise
+            raise Exception("The file %s can't be read as an image with Pillow" % Path(self.file_path).abspath())
 
     def save(self, outfile_path="", quality=90):
         """
@@ -179,6 +180,12 @@ class Picture:
             self.open()
 
         self.im.show()
+    
+    def clone(self):
+        """
+        Get a deepcopy of the Pic object
+        """
+        return deepcopy(self)
 
     
     def img2raw(self):
@@ -204,10 +211,10 @@ class Picture:
         """
         Rotate the image in 90 degree steps
 
-        :param method: One of :py:attr:`hubphoto.FLIP_LEFT_RIGHT`,
-          :py:attr:`hubphoto.FLIP_TOP_BOTTOM`, :py:attr:`hubphoto.ROTATE_90`,
-          :py:attr:`hubphoto.ROTATE_180`, :py:attr:`hubphoto.ROTATE_270` or
-          :py:attr:`hubphoto.TRANSPOSE`.
+        :param method: One of :py:attr:`Picture.FLIP_LEFT_RIGHT`,
+          :py:attr:`Picture.FLIP_TOP_BOTTOM`, :py:attr:`Picture.ROTATE_90`,
+          :py:attr:`Picture.ROTATE_180`, :py:attr:`Picture.ROTATE_270` or
+          :py:attr:`Picture.TRANSPOSE`.
         :returns: Returns a flipped or rotated copy of this image.
         We lose the correspondance img <-> raw so we reaply img2raw
         """
@@ -230,13 +237,13 @@ class Picture:
         # we lose the location of faces
         self.face_location = []
 
-    def ratio_cut(self, width, height, ratio, center=None):
+    def ratio_cut(self, ratio, center=None):
         """
         Cut the edges of the images to have the correct ratio
         Can be centered on a specific place of the image
         """
 
-        box = get_box4ratio_cut(width, height, ratio, center)
+        box = get_box4ratio_cut(self.im.width, self.im.height, ratio, center)
 
         if box is None:
             pass
@@ -320,6 +327,15 @@ class Picture:
 
         # finally do the crop
         self.crop_on_place(box)
+
+    def get_faces_as_Pic(self, ratio=None, margin=0):
+        pic_per_face = []
+        for i in range(len(self.face_location)):
+            new_Pic = self.clone()
+            new_Pic.face_crop(ratio, margin, whichface=i)
+            pic_per_face.append(new_Pic)
+        return pic_per_face
+
 
     def adjust_box(self, box):
         """

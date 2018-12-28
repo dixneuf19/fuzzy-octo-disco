@@ -18,6 +18,10 @@ def pic_object_faces(pic_object_raw):
     pic_object_raw.find_faces()
     return pic_object_raw
 
+def test_open_wrong_file():
+    with pytest.raises(Exception, match="can't be read as an image with Pillow"):
+        picture = Picture("find_faces/test/test_pic.py")
+        picture.open()
 
 def test_image2raw(pic_object):
     im_arr = image2raw(pic_object.im)
@@ -47,5 +51,23 @@ def test_face_crop(pic_object_faces):
     assert pic_object_faces.raw.shape == (155, 155, 3)
     assert pic_object_faces.face_location == [(0, 0, 155, 155)]
 
+def test_rotate_90(pic_object):
+    pic_object.rotate(Picture.ROTATE_90)
+    im_arr = image2raw(pic_object.im)
+    assert im_arr.shape == (512, 512, 3)
+    pixel = im_arr[512-(19+1)][19]
+    assert pixel.tolist() == [225, 130, 109]
 
-
+def test_clone(pic_object_raw):
+    clone = pic_object_raw.clone()
+    clone.img2raw()
+    assert clone.raw.tolist() == pic_object_raw.raw.tolist()
+    
+def test_pic_per_face(pic_object_faces):
+    pics = pic_object_faces.get_faces_as_Pic()
+    assert len(pics) == 1
+    pic = pics[0]
+    pic.img2raw()
+    pic_object_faces.face_crop()
+    pic_object_faces.img2raw()
+    assert pic.raw.tolist() == pic_object_faces.raw.tolist()
