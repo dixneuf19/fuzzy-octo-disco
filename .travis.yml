@@ -16,7 +16,7 @@ env:
   global:
     - GOOGLE_APPLICATION_CREDENTIALS=~/gcloud-service-key.json
     - PROJECT_NAME=dixneuf19-gke
-    - CLUSTER_NAME=your-first-cluster-1
+    - CLUSTER_NAME=standard-cluster-1
     - CLOUDSDK_COMPUTE_ZONE=europe-west1-d
     - DOCKER_IMAGE_NAME=find-faces
     - KUBE_DEPLOYMENT_NAME=find-faces
