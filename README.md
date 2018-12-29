@@ -70,7 +70,7 @@ python -m find_faces.grpc_service.client
 Use npm `grpcc`.
 
 ```bash
-grpcc -p find_faces/grpc_services/find_faces.proto -a localhost:50051 -i
+grpcc -p find_faces/grpc_service/find-faces.proto -a localhost:50051 -i
 ```
 
 Then, in the REPL

@@ -3,6 +3,7 @@ from logzero import logger
 from path import Path
 import grpc
 import time
+import os
 
 
 from find_faces.grpc_service import find_faces_pb2
@@ -10,6 +11,7 @@ from find_faces.grpc_service import find_faces_pb2_grpc
 from find_faces.pic import Picture
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
+FACE_CROP_MARGIN = float(os.environ.get("FACE_CROP_MARGIN", default=0))
 
 def make_save_path(original_path, index=0):
     original_path = Path(original_path)
@@ -89,7 +91,7 @@ class FindFacesServicer(find_faces_pb2_grpc.FindFacesServicer):
         for i in range(len(picture.face_location)):
             try:
                 face = picture.clone()
-                face.face_crop(whichface=i)
+                face.face_crop(margin=FACE_CROP_MARGIN, whichface=i)
                 out_path = make_save_path(request.picture.path, index=i)
                 face.save(out_path)
                 faces_paths.append(out_path)
