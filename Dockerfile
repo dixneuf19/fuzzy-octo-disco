@@ -37,8 +37,7 @@ RUN cd ~ && \
 
 # The rest of this file just runs an example script.
 
-COPY . /app
-WORKDIR  /app
+COPY . .
 RUN pip3 install -r requirements.txt
 
-CMD main.py
+CMD [ "python", "./main.py" ]
