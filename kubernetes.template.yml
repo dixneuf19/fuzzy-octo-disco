@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${KUBE_DEPLOYMENT_NAME}-deployment
+  labels:
+    app: ${KUBE_DEPLOYMENT_NAME}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${KUBE_DEPLOYMENT_NAME}
+  template:
+    metadata:
+      labels:
+        app: ${KUBE_DEPLOYMENT_NAME}
+    spec:
+      containers:
+      - name: $KUBE_DEPLOYMENT_NAME
+        image: gcr.io/${PROJECT_NAME}/${DOCKER_IMAGE_NAME}:${TRAVIS_COMMIT}
+        ports:
+        - containerPort: 50051
+        env:
+          - name: DOWNLOAD_FOLDER
+            value: "/mnt" # TODO: use a config map
+        volumeMounts:
+          # name must match the volume name below
+          - name: my-pvc-nfs
+            mountPath: "/mnt"
+      volumes:
+      - name: my-pvc-nfs
+        persistentVolumeClaim:
+          claimName: nfs
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: "${KUBE_DEPLOYMENT_NAME}-service"
+spec:
+  type: NodePort
+  selector:
+    app: $KUBE_DEPLOYMENT_NAME
+  ports:
+  - protocol: TCP
+    port: 50051
+    targetPort: 50051
