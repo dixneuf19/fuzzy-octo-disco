@@ -9,7 +9,8 @@ docker push gcr.io/${PROJECT_NAME}/${DOCKER_IMAGE_NAME}:${TRAVIS_COMMIT}
 envsubst < kubernetes.template.yml > kubernetes.yml
 
 # Apply the persistent volume storage
-kubectl apply -f nfs-server.yml
+# TODO: apply doesn't work if you change the volume size
+# kubectl apply -f nfs-server.yml 
 
 # Apply the app
 kubectl apply -f kubernetes.yml
