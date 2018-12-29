@@ -1,5 +1,7 @@
 # fuzzy-octo-disco
 
+[![Build Status](https://travis-ci.org/dixneuf19/fuzzy-octo-disco.svg?branch=master)](https://travis-ci.org/dixneuf19/fuzzy-octo-disco)
+
 Small project of face recognition and image manipulation in Python using face_recognition and Pillow library.
 
 Try it with
