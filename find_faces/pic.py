@@ -305,7 +305,7 @@ class Picture:
         # select the correct face
         if len(self.face_location) == 0:
             raise Exception("You need to found at least one face with find_faces first")
-        elif (len(self.face_location) > whichface + 1):
+        elif (len(self.face_location) <= whichface):
             raise Exception("Only %d face found, can't crop on the %d nth" % (len(self.face_location), whichface))
         box = self.face_location[whichface]
 

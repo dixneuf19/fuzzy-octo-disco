@@ -95,7 +95,7 @@ class FindFacesServicer(find_faces_pb2_grpc.FindFacesServicer):
                 faces_paths.append(out_path)
             except Exception as error:
                 logger.debug(error)
-                logger.warn("failed to clone, crop and save face %d" % i)
+                logger.warn("failed to clone, crop or save face %d" % i)
                 pass
         
         if len(faces_paths) == 0:
