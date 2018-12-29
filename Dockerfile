@@ -37,8 +37,8 @@ RUN cd ~ && \
 
 # The rest of this file just runs an example script.
 
-COPY . /root/dank-face-bot
-RUN cd /root/dank-face-bot && \
-    pip3 install -r requirements.txt
+COPY . /app
+WORKDIR  /app
+RUN pip3 install -r requirements.txt
 
-CMD TOKEN=$TOKEN python3 /root/dank-face-bot/app.py
+CMD main.py
