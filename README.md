@@ -18,6 +18,10 @@ First, I thougth about sending the pictures through *GRPC* as bytes. But GRPC is
 
 Therefore, I just send the path of the file and this *find-faces* service get the image how he can. On Kubernetes, this means I'll need a *shared volume*.
 
+We use a NFS shared volume : https://github.com/mappedinn/kubernetes-nfs-volume-on-gke
+
+It's deployed with the main [DFB repo](https://github.com/dixneuf19/dank-face-bot).
+
 ## Test
 
 Use the `pytest` library. Just run
@@ -27,6 +31,10 @@ pytest
 ```
 
 Add the `-s` arg to display print.
+
+## Deploy
+
+See the main [DFB repo](https://github.com/dixneuf19/dank-face-bot) for reminders about k8s, Travis and etc...
 
 ## GRPC
 
