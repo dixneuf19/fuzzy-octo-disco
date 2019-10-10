@@ -3,6 +3,8 @@
 [![Build Status](https://travis-ci.org/dixneuf19/fuzzy-octo-disco.svg?branch=master)](https://travis-ci.org/dixneuf19/fuzzy-octo-disco)
 
 Small project of face recognition and image manipulation in Python using face_recognition and Pillow library.
+It is now used in the [Dank Face Bot](https://github.com/dixneuf19/fuzzy-octo-disco) project, as a separate micro-service.
+The main use of this project is to identify faces on picture, by rotating it, and then return croped pictures of this faces.
 
 Try it with
 
@@ -10,15 +12,24 @@ Try it with
 python example.py
 ```
 
+Don't forget to install dependecies in a Python *virtualenv* first !
+
+```bash
+pip install -r requirements.txt
+```
+
+See [my gist](https://gist.github.com/dixneuf19/a398c08f00aac24609c3cc44c29af1f0) for more details on how to setup *virtualenvwrapper* with zsh.
+
 ## Choice of architecture
 
+These program need to communicate with other services, as dank-face-bot, which sends pictures, and expects some cropped faces back. But how can we transfer the pictures, an heavy load, between the services ?
+
 Originally, the *Picture* class needed to use a file path to open the file.
+First, I thougth about sending the pictures through *gRPC* as bytes. But gRPC isn't made for large transfer, and I would have to change the class.
 
-First, I thougth about sending the pictures through *GRPC* as bytes. But GRPC isn't made for large transfer, and I would have to change the class.
+Therefore, I just send the path of the file and this *find-faces* service get the image how he can. On Kubernetes, this means I'll need a *shared volume*. On docker-compose, I use a shared volume.
 
-Therefore, I just send the path of the file and this *find-faces* service get the image how he can. On Kubernetes, this means I'll need a *shared volume*.
-
-We use a NFS shared volume : https://github.com/mappedinn/kubernetes-nfs-volume-on-gke
+We use a NFS shared volume : <https://github.com/mappedinn/kubernetes-nfs-volume-on-gke>
 
 It's deployed with the main [DFB repo](https://github.com/dixneuf19/dank-face-bot).
 
