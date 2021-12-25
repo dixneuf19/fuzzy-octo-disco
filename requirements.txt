@@ -1,6 +1,6 @@
 appdirs==1.4.3
 astroid==2.1.0
-atomicwrites==1.2.1
+atomicwrites==1.4.0
 attrs==18.2.0
 black==18.9b0
 Click==7.0
