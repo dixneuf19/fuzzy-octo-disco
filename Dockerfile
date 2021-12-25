@@ -1,8 +1,8 @@
 # This is a sample Dockerfile you can modify to deploy your own app based on face_recognition
 
-FROM python:3.6-slim-stretch
+FROM python:3.8-slim-bullseye
 
-RUN apt-get -y update && apt-get install -y --fix-missing \
+RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     gfortran \
@@ -11,7 +11,7 @@ RUN apt-get -y update && apt-get install -y --fix-missing \
     curl \
     graphicsmagick \
     libgraphicsmagick1-dev \
-    libatlas-dev \
+    libatlas-base-dev \
     libavcodec-dev \
     libavformat-dev \
     libgtk2.0-dev \
@@ -23,15 +23,14 @@ RUN apt-get -y update && apt-get install -y --fix-missing \
     python3-numpy \
     software-properties-common \
     zip \
-    && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip3 install -r requirements.txt
+RUN pip install -r requirements.txt
 
-# The rest of this file just runs an example script.
+COPY fuzzyoctodisco/ fuzzyoctodisco/ 
 
-COPY main.py main.py
-COPY find_faces/ find_faces/ 
-COPY config.json config.json
+EXPOSE 80
 
-CMD [ "python", "./main.py" ]
+CMD ["uvicorn", "fuzzyoctodisco.main:app" , "--host", "0.0.0.0", "--port", "80"]
+

@@ -1,8 +1,10 @@
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-from path import Path
+import matplotlib
 
+matplotlib.use("TkAgg")
+import matplotlib.gridspec as gridspec
+import matplotlib.pyplot as plt
 from find_faces.pic import Picture
+from path import Path
 
 picture = Picture("pictures/lena.png")
 picture.open()
@@ -14,7 +16,7 @@ gs = gridspec.GridSpec(nrows=3, ncols=2, height_ratios=[2, 1, 2])
 # Original picture
 ax0 = fig.add_subplot(gs[0, :])
 ax0.imshow(picture.raw)
-ax0.set_title('Original picture')
+ax0.set_title("Original picture")
 
 # Original picture
 
@@ -41,7 +43,7 @@ picture.img2raw()
 
 ax1 = fig.add_subplot(gs[2, :])
 ax1.imshow(picture.raw)
-ax1.set_title('First face')
+ax1.set_title("First face")
 
 plt.tight_layout()
 plt.show()

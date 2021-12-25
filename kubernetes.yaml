@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fuzzy-octo-disco
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fuzzy-octo-disco
+  template:
+    metadata:
+      labels:
+        app: fuzzy-octo-disco
+    spec:
+      containers:
+      - name: fuzzy-octo-disco
+        image: dixneuf19/fuzzy-octo-disco:9fce260
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+      nodeSelector:
+        "kubernetes.io/hostname": "brassberry-27"
