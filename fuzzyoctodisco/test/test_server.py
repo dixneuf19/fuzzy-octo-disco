@@ -1,4 +1,4 @@
-from find_faces.server import make_save_path
+from fuzzyoctodisco.main import make_save_path
 
 
 def test_make_save_path():

@@ -1,5 +1,6 @@
 import pytest
-from find_faces.pic import *
+
+from fuzzyoctodisco.pic import *
 
 
 @pytest.fixture
