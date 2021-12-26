@@ -119,3 +119,8 @@ def faces(pic_path: str):
         "nbFaces": len(faces_pictures),
         "paths": faces_pictures,
     }
+
+
+@app.get("/health")
+async def get_health():
+    return {"message": "OK"}
