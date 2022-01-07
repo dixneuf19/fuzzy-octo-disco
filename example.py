@@ -3,7 +3,7 @@ import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
-from find_faces.pic import Picture
+from fuzzyoctodisco.pic import Picture
 from path import Path
 
 picture = Picture("pictures/lena.png")
