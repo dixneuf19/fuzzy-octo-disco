@@ -3,6 +3,6 @@ fastapi==0.135.3
 loguru==0.6.0
 matplotlib==3.6.3
 numpy==1.26.4
-path==16.6.0
+path==16.16.0
 Pillow==9.3.0
 uvicorn==0.43.0
