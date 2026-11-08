@@ -55,6 +55,11 @@ def test_find_face(pic_object_raw):
     assert iou(face_location[0], (218, 219, 373, 374)) > 0.5
 
 
+def test_find_face_drops_faces_smaller_than_min_size(pic_object):
+    small = pic_object.im.resize((128, 128))  # lena's face becomes about 35 px
+    assert find_faces(image2raw(small)) == []
+
+
 def test_find_face_grayscale_and_rgba(pic_object):
     for mode in ("L", "RGBA"):
         assert len(find_faces(image2raw(pic_object.im.convert(mode)))) == 1

@@ -51,6 +51,9 @@ def detect_yunet(path):
         boxes = find_faces(image2raw(im))
         if boxes:
             return rotations, boxes
+        # Same as the service: faces too small to crop mean it is upright
+        if rotations == 0 and find_faces(image2raw(im), min_size=0):
+            return 0, []
         im = im.transpose(Image.Transpose.ROTATE_90)
     return 0, []
 

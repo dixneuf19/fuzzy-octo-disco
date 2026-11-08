@@ -16,6 +16,9 @@ YUNET_MODEL = os.environ.get(
     ),
 )
 FACE_SCORE_THRESHOLD = float(os.environ.get("FACE_SCORE_THRESHOLD", default=0.7))
+# Faces smaller than this (shortest side, in pixels) are dropped: their crops
+# are unreadable. 40 matches the smallest face dlib HOG could find.
+MIN_FACE_SIZE = int(os.environ.get("MIN_FACE_SIZE", default=40))
 
 _detector = None
 
@@ -50,11 +53,14 @@ def image2raw(img):
     return im_arr
 
 
-def find_faces(raw_im):
+def find_faces(raw_im, min_size=None):
     """
     Get the list of the locations of the faces found on the Picture,
-    as (left, top, right, bottom) boxes used by PIL
+    as (left, top, right, bottom) boxes used by PIL.
+    Faces smaller than min_size (default MIN_FACE_SIZE) are dropped.
     """
+    if min_size is None:
+        min_size = MIN_FACE_SIZE
     img = np.ascontiguousarray(_to_bgr(raw_im))
     height, width = img.shape[:2]
     detector = _get_detector()
@@ -67,6 +73,8 @@ def find_faces(raw_im):
     for x, y, w, h in faces[:, :4]:
         left, top = max(int(x), 0), max(int(y), 0)
         right, bottom = min(int(x + w), width), min(int(y + h), height)
+        if min(right - left, bottom - top) < min_size:
+            continue
         face_location.append((left, top, right, bottom))
 
     return face_location
@@ -209,6 +217,7 @@ class Picture:
         self.im = None
         self.raw = []
         self.face_location = []
+        self.has_small_faces = False
         self.nb_face = 0
         self.cut_error = False
 
@@ -271,7 +280,14 @@ class Picture:
         if len(self.raw) == 0:
             raise Exception("Need to get raw img array for face detection")
 
-        self.face_location = find_faces(self.raw)
+        all_faces = find_faces(self.raw, min_size=0)
+        self.face_location = [
+            face
+            for face in all_faces
+            if min(face[2] - face[0], face[3] - face[1]) >= MIN_FACE_SIZE
+        ]
+        # Faces too small to crop still tell us the picture is upright
+        self.has_small_faces = len(all_faces) > len(self.face_location)
 
     def rotate(self, method):
         """
