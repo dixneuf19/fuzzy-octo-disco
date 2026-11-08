@@ -1,12 +1,43 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+import os
 from copy import deepcopy
 
-import face_recognition
+import cv2
 import numpy as np
 from path import Path
 from PIL import Image
+
+YUNET_MODEL = os.environ.get(
+    "YUNET_MODEL",
+    default=os.path.join(
+        os.path.dirname(__file__), "models", "face_detection_yunet_2026may.onnx"
+    ),
+)
+FACE_SCORE_THRESHOLD = float(os.environ.get("FACE_SCORE_THRESHOLD", default=0.7))
+# Faces smaller than this (shortest side, in pixels) are dropped: their crops
+# are unreadable. 40 matches the smallest face dlib HOG could find.
+MIN_FACE_SIZE = int(os.environ.get("MIN_FACE_SIZE", default=40))
+
+_detector = None
+
+
+def _get_detector():
+    global _detector
+    if _detector is None:
+        _detector = cv2.FaceDetectorYN.create(
+            YUNET_MODEL, "", (320, 320), FACE_SCORE_THRESHOLD, 0.3, 5000
+        )
+    return _detector
+
+
+def _to_bgr(raw_im):
+    if raw_im.ndim == 2:
+        return cv2.cvtColor(raw_im, cv2.COLOR_GRAY2BGR)
+    if raw_im.shape[2] == 4:
+        return cv2.cvtColor(raw_im, cv2.COLOR_RGBA2BGR)
+    return cv2.cvtColor(raw_im, cv2.COLOR_RGB2BGR)
 
 
 def image2raw(img):
@@ -22,16 +53,29 @@ def image2raw(img):
     return im_arr
 
 
-def find_faces(raw_im):
+def find_faces(raw_im, min_size=None):
     """
-    Get the list of the locations of the faces found on the Picture
+    Get the list of the locations of the faces found on the Picture,
+    as (left, top, right, bottom) boxes used by PIL.
+    Faces smaller than min_size (default MIN_FACE_SIZE) are dropped.
     """
-    face_location_temp = face_recognition.face_locations(raw_im)
-    # current format : (top, right, bottom, left)
-    # switching to (left, top, right, bottom) used by PIL
+    if min_size is None:
+        min_size = MIN_FACE_SIZE
+    img = np.ascontiguousarray(_to_bgr(raw_im))
+    height, width = img.shape[:2]
+    detector = _get_detector()
+    detector.setInputSize((width, height))
+    _, faces = detector.detect(img)
+    if faces is None:
+        return []
+
     face_location = []
-    for face in face_location_temp:
-        face_location.append((face[3], face[0], face[1], face[2]))
+    for x, y, w, h in faces[:, :4]:
+        left, top = max(int(x), 0), max(int(y), 0)
+        right, bottom = min(int(x + w), width), min(int(y + h), height)
+        if min(right - left, bottom - top) < min_size:
+            continue
+        face_location.append((left, top, right, bottom))
 
     return face_location
 
@@ -139,7 +183,7 @@ def crop(img, box=None):
 
 class Picture:
     """
-    Class which can treat pictures with face_recognition and Pillow functions
+    Class which can treat pictures with OpenCV face detection and Pillow functions
     """
 
     # transpose
@@ -173,6 +217,7 @@ class Picture:
         self.im = None
         self.raw = []
         self.face_location = []
+        self.has_small_faces = False
         self.nb_face = 0
         self.cut_error = False
 
@@ -233,9 +278,16 @@ class Picture:
         Apply find_faces in place
         """
         if len(self.raw) == 0:
-            raise Exception("Need to get raw img array for face_recognition")
+            raise Exception("Need to get raw img array for face detection")
 
-        self.face_location = find_faces(self.raw)
+        all_faces = find_faces(self.raw, min_size=0)
+        self.face_location = [
+            face
+            for face in all_faces
+            if min(face[2] - face[0], face[3] - face[1]) >= MIN_FACE_SIZE
+        ]
+        # Faces too small to crop still tell us the picture is upright
+        self.has_small_faces = len(all_faces) > len(self.face_location)
 
     def rotate(self, method):
         """

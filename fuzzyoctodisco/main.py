@@ -22,7 +22,11 @@ def find_faces(picture, nb_faces=2, rotate=True):
     if len(picture.face_location) == 0:
         logger.info("No faces found")
 
-        # let's try to rotate the picture
+        # let's try to rotate the picture, unless faces too small to crop
+        # show it is already upright
+        if rotate and picture.has_small_faces:
+            logger.info("Only faces too small to crop were found")
+            return 0
         if rotate:
             logger.info("Try to rotate the picture")
             i = 0

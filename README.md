@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/dixneuf19/fuzzy-octo-disco.svg?branch=master)](https://travis-ci.org/dixneuf19/fuzzy-octo-disco)
 
-Small project of face recognition and image manipulation in Python using face_recognition and Pillow library.
+Small project of face recognition and image manipulation in Python using OpenCV (YuNet face detector) and Pillow.
 It is now used in the [Dank Face Bot](https://github.com/dixneuf19/fuzzy-octo-disco) project, as a separate micro-service.
 The main use of this project is to identify faces on picture, by rotating it, and then return croped pictures of this faces.
 
