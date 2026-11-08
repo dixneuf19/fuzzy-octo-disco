@@ -15,7 +15,7 @@ YUNET_MODEL = os.environ.get(
         os.path.dirname(__file__), "models", "face_detection_yunet_2026may.onnx"
     ),
 )
-FACE_SCORE_THRESHOLD = float(os.environ.get("FACE_SCORE_THRESHOLD", default=0.9))
+FACE_SCORE_THRESHOLD = float(os.environ.get("FACE_SCORE_THRESHOLD", default=0.7))
 
 _detector = None
 
