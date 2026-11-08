@@ -40,9 +40,30 @@ def test_find_faces_without_raw(pic_object):
         pic_object.find_faces()
 
 
+def iou(a, b):
+    left, top = max(a[0], b[0]), max(a[1], b[1])
+    right, bottom = min(a[2], b[2]), min(a[3], b[3])
+    inter = max(0, right - left) * max(0, bottom - top)
+    area = lambda box: (box[2] - box[0]) * (box[3] - box[1])
+    return inter / (area(a) + area(b) - inter)
+
+
 def test_find_face(pic_object_raw):
     face_location = find_faces(pic_object_raw.raw)
-    assert face_location == [(218, 219, 373, 374)]
+    assert len(face_location) == 1
+    # Lena's face, as boxed by the previous dlib HOG detector
+    assert iou(face_location[0], (218, 219, 373, 374)) > 0.5
+
+
+def test_find_face_grayscale_and_rgba(pic_object):
+    for mode in ("L", "RGBA"):
+        assert len(find_faces(image2raw(pic_object.im.convert(mode)))) == 1
+
+
+def test_find_face_on_sideways_picture_needs_rotation(pic_object):
+    pic_object.rotate(Picture.ROTATE_90)
+    pic_object.img2raw()
+    assert find_faces(pic_object.raw) == []
 
 
 def test_face_crop_whithout_find_faces(pic_object_raw):
@@ -56,10 +77,12 @@ def test_face_crop_for_a_surnumerous_face(pic_object_faces):
 
 
 def test_face_crop(pic_object_faces):
+    left, top, right, bottom = pic_object_faces.face_location[0]
+    width, height = right - left, bottom - top
     pic_object_faces.face_crop()
     pic_object_faces.img2raw()
-    assert pic_object_faces.raw.shape == (155, 155, 3)
-    assert pic_object_faces.face_location == [(0, 0, 155, 155)]
+    assert pic_object_faces.raw.shape == (height, width, 3)
+    assert pic_object_faces.face_location == [(0, 0, width, height)]
 
 
 def test_rotate_90(pic_object):
