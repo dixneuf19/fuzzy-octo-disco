@@ -27,7 +27,7 @@ check-format:
 	# flake8 ${PACKAGE_NAME}
 
 test:
-	PYTHONPATH=. pytest --cov=${PACKAGE_NAME} --cov-report=xml tests
+	PYTHONPATH=. pytest --cov=${PACKAGE_NAME} --cov-report=xml ${PACKAGE_NAME}/test
 
 build:
 	docker build -t $(DOCKER_IMAGE_PATH) .

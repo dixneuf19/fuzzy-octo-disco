@@ -17,7 +17,24 @@ env:
   IMAGE_TAG: ${{ github.sha }}
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: ghcr.io/dixneuf19/docker-python-face-recognition:main
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Check format
+        run: make check-format
+
+      - name: Run tests
+        run: make test
+
   build_and_release:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
