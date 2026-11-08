@@ -1,4 +1,4 @@
-.PHONY: install install-dev dev build run push release release-multi deploy
+.PHONY: install dev build run push release release-multi deploy
 
 PACKAGE_NAME=fuzzyoctodisco
 DOCKER_REPOSITERY=dixneuf19
@@ -9,25 +9,21 @@ APP_NAME=fuzzy-octo-disco
 KUBE_NAMESPACE=dank-face-bot
 
 install:
-	pip install -r requirements.txt
-
-install-dev: install
-	pip install -r requirements-dev.txt
+	uv sync
 
 dev:
-	uvicorn ${PACKAGE_NAME}.main:app --reload
+	uv run uvicorn ${PACKAGE_NAME}.main:app --reload
 
 format:
-	isort .
-	black .
+	uv run isort .
+	uv run black .
 
 check-format:
-	isort --profile black --check ${PACKAGE_NAME}
-	black --check ${PACKAGE_NAME}
-	# flake8 ${PACKAGE_NAME}
+	uv run isort --check ${PACKAGE_NAME}
+	uv run black --check ${PACKAGE_NAME}
 
 test:
-	PYTHONPATH=. pytest --cov=${PACKAGE_NAME} --cov-report=xml tests
+	uv run pytest --cov=${PACKAGE_NAME} --cov-report=xml
 
 build:
 	docker build -t $(DOCKER_IMAGE_PATH) .

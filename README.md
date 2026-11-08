@@ -12,13 +12,11 @@ Try it with
 python example.py
 ```
 
-Don't forget to install dependecies in a Python *virtualenv* first !
+Install dependencies with [uv](https://docs.astral.sh/uv/) (building dlib needs `cmake` and BLAS/LAPACK headers):
 
 ```bash
-pip install -r requirements.txt
+uv sync
 ```
-
-See [my gist](https://gist.github.com/dixneuf19/a398c08f00aac24609c3cc44c29af1f0) for more details on how to setup *virtualenvwrapper* with zsh.
 
 ## Choice of architecture
 
@@ -38,7 +36,7 @@ It's deployed with the main [DFB repo](https://github.com/dixneuf19/dank-face-bo
 Use the `pytest` library. Just run
 
 ```bash
-pytest
+uv run pytest
 ```
 
 Add the `-s` arg to display print.
