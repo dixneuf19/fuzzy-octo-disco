@@ -10,9 +10,9 @@ FACE_CROP_MARGIN = float(os.environ.get("FACE_CROP_MARGIN", default=0))
 
 def make_save_path(original_path, index=0):
     original_path = Path(original_path)
-    out_name = original_path.stem + "_out_%d" % index + original_path.ext
+    out_name = original_path.stem + "_out_%d" % index + original_path.suffix
     full_path = original_path.dirname() / out_name
-    return full_path.abspath()
+    return full_path.absolute()
 
 
 def find_faces(picture, nb_faces=2, rotate=True):
@@ -72,19 +72,19 @@ def faces(pic_path: str):
             "INVALID_PATH_ERROR", f"The path '{picture_path}' doesnt exists"
         )
 
-    if not (picture_path.ext.lower() in (".jpg", ".jpeg", ".png", ".gif")):
+    if not (picture_path.suffix.lower() in (".jpg", ".jpeg", ".png", ".gif")):
         return error_response(
             "INVALID_FILE_EXTENSION_ERROR",
             f"The type of {picture_path} isn't supported",
         )
 
     # Finally we are good to go
-    picture = Picture(picture_path.abspath())
+    picture = Picture(picture_path.absolute())
     try:
         picture.open()
     except OSError:
         return error_response(
-            "OPEN_FILE_ERROR", f"Error when opening the file {picture_path.abspath()}"
+            "OPEN_FILE_ERROR", f"Error when opening the file {picture_path.absolute()}"
         )
 
     try:
