@@ -229,11 +229,11 @@ class Picture:
         Open the file and store it in the class
         """
         try:
-            self.im = Image.open(Path(self.file_path).abspath())
+            self.im = Image.open(Path(self.file_path).absolute())
         except OSError:
             raise Exception(
                 "The file %s can't be read as an image with Pillow"
-                % Path(self.file_path).abspath()
+                % Path(self.file_path).absolute()
             )
 
     def save(self, outfile_path="", quality=90, overwrite=False):
@@ -245,7 +245,7 @@ class Picture:
         if overwrite == True:
             outfile_path = self.file_path
 
-        self.im.save(Path(outfile_path).abspath(), quality=quality)
+        self.im.save(Path(outfile_path).absolute(), quality=quality)
 
     def show(self):
         """
