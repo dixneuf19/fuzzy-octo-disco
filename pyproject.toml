@@ -9,7 +9,7 @@ dependencies = [
     "loguru>=0.7",
     "numpy>=2.3",
     "opencv-python-headless>=5",
-    "path>=16.16,<17",
+    "path>=17.1,<18",
     "pillow>=13",
     "uvicorn>=0.43",
 ]
